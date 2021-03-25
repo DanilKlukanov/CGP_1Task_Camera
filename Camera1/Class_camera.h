@@ -35,6 +35,6 @@ private:
 
 	bool firstMouse = true;
 
-	float lastX = 800 / 2.0f;
+	float lastX = 1600 / 2.0f;
 	float lastY = 600 / 2.0f;
 };

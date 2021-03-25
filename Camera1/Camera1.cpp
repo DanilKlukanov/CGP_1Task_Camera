@@ -48,18 +48,58 @@ int main() {
 		std::cout << "Error:: glew not init =(" << std::endl;
 		return -1;
 	}
-
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LEQUAL);
+	glDepthRange(0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	
 	Shader myshader;
 	myshader.LoadShader("e4.vs", "e4.fs");
 
 	Class_camera camera;
 
 	float vertices[] = {
-		//x      y     z      u     v
-		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // левая нижняя
-		-0.5f, 0.5f, 0.0f,   0.0f, 1.0f,// левая верхняя
-		 0.5f, 0.5f, 0.0f,   1.0f, 1.0f,// правая верхняя
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f // правая нижняя
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
 	//EBO позволит использовать одни и те же вершины в разных треугольниках
@@ -67,6 +107,8 @@ int main() {
 		0, 1, 3, // первый треугольник
 		1, 2, 3  // второй треугольник
 	};
+	
+	vec3 CubePosition(1.5f,  0.2f, -1.5f);
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO); // сгенерили id для массивов вершин (у нас это один id)
@@ -115,7 +157,7 @@ int main() {
 	stbi_set_flip_vertically_on_load(true);
 
 	//проверка на загрузку текстуры
-	unsigned char* data = stbi_load("2.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("1.jpg", &width, &height, &nrChannels, 0);
 	if (data) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -128,7 +170,6 @@ int main() {
 	// цикл рендера
 	bool isGo = true;
 	while (isGo) {
-
 		// обработка ивентов от SFML (тут и мышь и клавиши обрабатываются)
 		sf::Event windowEvent;
 		while (window.pollEvent(windowEvent)) { // обработка ивентов      pollEvent-Поместите событие в начало очереди событий, если таковая имеется, и верните его.
@@ -150,25 +191,28 @@ int main() {
 		}
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //задали цвет отчистки
-		glClear(GL_COLOR_BUFFER_BIT);                      //отчистка экрана
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, texture); //связали текстуру
 
 		myshader.glUseProgramr(); // установили нужную шейдерную программу
 		glBindVertexArray(VAO);      // установили нужный массив для рендеринга
 		//glDrawArrays(GL_TRIANGLES, 0, 6); //отрисовали
-
-		math4 model(1.0f);
+		
 		math4 view = camera.GetViewMatrix();
 		math4 prj = camera.GetProjectionMatrix();
-
-		myshader.glUniGet("model", model);
+		
 		myshader.glUniGet("view", view);
 		myshader.glUniGet("projection", prj);
+		
+		// calculate the model matrix for each object and pass it to shader before drawing
+		math4 model = math4(1.0f); // make sure to initialize matrix to identity matrix first
+		model = model.Translate(CubePosition);
+		myshader.glUniGet("model", model);
 
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		//для отрисовки с EBO ипользуется glDrawElements
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		window.display();
 	}
